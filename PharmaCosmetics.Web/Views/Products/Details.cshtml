@@ -1,0 +1,50 @@
+﻿@model PharmaCosmetics.Web.Models.ViewModels.ProductDetailsVm
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row">
+    <div class="col-md-5">
+        @{
+            var primary = Model.Images.FirstOrDefault(i => i.IsPrimary) ?? Model.Images.FirstOrDefault();
+        }
+        <img class="img-fluid mb-3" src="@primary?.Url" alt="@Model.Name" onerror="this.src='/images/placeholder.png'" />
+
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var img in Model.Images)
+            {
+                <img src="@img.Url" alt="@img.Caption" style="width:80px;height:80px;object-fit:cover;cursor:pointer;"
+                     onclick="document.querySelector('#mainImg').src='@img.Url';" />
+            }
+        </div>
+    </div>
+    <div class="col-md-7">
+        <h1>@Model.Name</h1>
+        <p class="text-muted">@Model.BrandName / @Model.CategoryName</p>
+        <p>@Model.ShortDescription</p>
+        <hr />
+        <h5>Active Ingredients</h5>
+        <ul>
+            @foreach (var ai in Model.ActiveIngredients)
+            {
+                <li><strong>@ai.Name</strong> @if (!string.IsNullOrWhiteSpace(ai.ConcentrationInfo)) {
+                <text>- @ai.ConcentrationInfo</text>
+            }
+</li>
+                        }
+        </ul>
+
+        <h5>Tags</h5>
+        <p>
+            @foreach (var t in Model.Tags)
+            {
+                <span class="badge bg-secondary">@t</span>
+            }
+        </p>
+
+        <h5>Description</h5>
+        <p>@Model.FullDescription</p>
+
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary mt-3">Back to list</a>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+﻿@model PharmaCosmetics.Web.Models.ViewModels.PagedResult<PharmaCosmetics.Web.Models.ViewModels.ProductListItemVm>
+@{
+    var filter = (PharmaCosmetics.Web.Models.ViewModels.ProductListFilter)ViewBag.Filter;
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <input name="Query" value="@filter.Query" class="form-control" placeholder="Search..." />
+        </div>
+        <div class="col-md-2">
+            <input name="Category" value="@filter.Category" class="form-control" placeholder="Category slug" />
+        </div>
+        <div class="col-md-2">
+            <input name="Brand" value="@filter.Brand" class="form-control" placeholder="Brand slug" />
+        </div>
+        <div class="col-md-2">
+            <input name="Tag" value="@filter.Tag" class="form-control" placeholder="Tag slug" />
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" type="submit">Filter</button>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No products found.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var p in Model.Items)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@p.PrimaryImageUrl" class="card-img-top" alt="@p.Name" onerror="this.src='/images/placeholder.png'" />
+                    <div class="card-body">
+                        <h5 class="card-title">@p.Name</h5>
+                        <p class="card-text small text-muted">@p.ShortDescription</p>
+                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Products", new { slug = p.Slug })">View</a>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">@p.BrandName / @p.CategoryName</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav class="mt-4">
+        <ul class="pagination">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                var active = i == Model.Page ? "active" : "";
+                <li class="page-item @active">
+                    <a class="page-link" href="@Url.Action("Index", new { filter.Query, filter.Category, filter.Brand, filter.Tag, Page = i, filter.PageSize })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
