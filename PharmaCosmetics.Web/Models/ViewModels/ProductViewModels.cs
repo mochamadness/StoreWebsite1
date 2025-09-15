@@ -1,5 +1,7 @@
 namespace PharmaCosmetics.Web.Models.ViewModels;
 
+using System.ComponentModel.DataAnnotations;
+
 public class ProductListFilter
 {
     public string? Query { get; set; }
@@ -46,20 +48,47 @@ public class ProductDetailsVm
 
 public class ProductCreateVm
 {
+    [Required]
+    [Display(Name = "Product Name")]
+    [StringLength(200)]
     public string Name { get; set; } = string.Empty;
+
+    [Display(Name = "Short Description")]
+    [StringLength(500)]
     public string? ShortDescription { get; set; }
+
+    [Display(Name = "Full Description")]
     public string? FullDescription { get; set; }
+
+    [Required]
+    [Display(Name = "Category")]
     public int CategoryId { get; set; }
+
+    [Display(Name = "Brand")]
     public int? BrandId { get; set; }
 }
 
 public class ProductEditVm
 {
     public int Id { get; set; }
+
+    [Required]
+    [Display(Name = "Product Name")]
+    [StringLength(200)]
     public string Name { get; set; } = string.Empty;
+
+    [Display(Name = "Short Description")]
+    [StringLength(500)]
     public string? ShortDescription { get; set; }
+
+    [Display(Name = "Full Description")]
     public string? FullDescription { get; set; }
+
+    [Required]
+    [Display(Name = "Category")]
     public int CategoryId { get; set; }
+
+    [Display(Name = "Brand")]
     public int? BrandId { get; set; }
 }
 

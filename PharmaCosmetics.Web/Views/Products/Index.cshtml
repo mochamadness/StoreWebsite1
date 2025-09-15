@@ -1,10 +1,24 @@
-﻿@model PharmaCosmetics.Web.Models.ViewModels.PagedResult<PharmaCosmetics.Web.Models.ViewModels.ProductListItemVm>
+@model PharmaCosmetics.Web.Models.ViewModels.PagedResult<PharmaCosmetics.Web.Models.ViewModels.ProductListItemVm>
 @{
     var filter = (PharmaCosmetics.Web.Models.ViewModels.ProductListFilter)ViewBag.Filter;
     ViewData["Title"] = "Products";
 }
 
-<h1>Products</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Products</h1>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-success">Add New Product</a>
+    }
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <form method="get" class="mb-3">
     <div class="row g-2">
@@ -41,7 +55,17 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@p.Name</h5>
                         <p class="card-text small text-muted">@p.ShortDescription</p>
-                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Products", new { slug = p.Slug })">View</a>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Products", new { slug = p.Slug })">View</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id">Edit</a>
+                                <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" 
+                                      onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            }
+                        </div>
                     </div>
                     <div class="card-footer">
                         <small class="text-muted">@p.BrandName / @p.CategoryName</small>
