@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PharmaCosmetics.Web.Models.Entities;
 using PharmaCosmetics.Web.Models.ViewModels;
 using System.Linq;
@@ -37,5 +37,10 @@ public class MappingProfile : Profile
                     Name = pi.ActiveIngredient.Name,
                     ConcentrationInfo = pi.ConcentrationInfo
                 })));
+
+        // CRUD mappings
+        CreateMap<ProductCreateVm, Product>();
+        CreateMap<Product, ProductEditVm>();
+        CreateMap<ProductEditVm, Product>();
     }
 }

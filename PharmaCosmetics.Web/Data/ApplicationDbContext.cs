@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PharmaCosmetics.Web.Models.Entities;
 using PharmaCosmetics.Web.Services;
 
 namespace PharmaCosmetics.Web.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     private readonly IDateTimeProvider _clock;
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDateTimeProvider clock) : base(options)
@@ -24,6 +25,13 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Global query filter for soft delete
+        modelBuilder.Entity<Product>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsDeleted);
+        modelBuilder.Entity<Brand>().HasQueryFilter(b => !b.IsDeleted);
+        modelBuilder.Entity<Tag>().HasQueryFilter(t => !t.IsDeleted);
+        modelBuilder.Entity<ActiveIngredient>().HasQueryFilter(ai => !ai.IsDeleted);
 
         // ProductTag composite key
         modelBuilder.Entity<ProductTag>()
@@ -74,6 +82,7 @@ public class ApplicationDbContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = _clock.UtcNow;
+        
         foreach (var entry in ChangeTracker.Entries<Models.Entities.BaseEntity>())
         {
             if (entry.State == EntityState.Added)
@@ -86,6 +95,20 @@ public class ApplicationDbContext : DbContext
                 entry.Entity.UpdatedUtc = now;
             }
         }
+
+        foreach (var entry in ChangeTracker.Entries<ApplicationUser>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedUtc = now;
+                entry.Entity.UpdatedUtc = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedUtc = now;
+            }
+        }
+
         return base.SaveChangesAsync(cancellationToken);
     }
 }

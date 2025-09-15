@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PharmaCosmetics.Web.Models.Entities;
 using PharmaCosmetics.Web.Services;
 
@@ -12,16 +13,27 @@ public interface IDbSeeder
 public class DbSeeder : IDbSeeder
 {
     private readonly ApplicationDbContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    public DbSeeder(ApplicationDbContext db)
+    public DbSeeder(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         _db = db;
+        _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public async Task SeedAsync(IWebHostEnvironment env)
     {
         await _db.Database.MigrateAsync();
 
+        // Seed roles
+        await SeedRolesAsync();
+
+        // Seed admin user
+        await SeedAdminUserAsync();
+
+        // Seed sample data if no products exist
         if (await _db.Products.AnyAsync())
             return;
 
@@ -60,5 +72,41 @@ public class DbSeeder : IDbSeeder
 
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
+    }
+
+    private async Task SeedRolesAsync()
+    {
+        if (!await _roleManager.RoleExistsAsync("Admin"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+        }
+
+        if (!await _roleManager.RoleExistsAsync("User"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("User"));
+        }
+    }
+
+    private async Task SeedAdminUserAsync()
+    {
+        const string adminEmail = "admin@pharmacosmetics.com";
+        
+        if (await _userManager.FindByEmailAsync(adminEmail) == null)
+        {
+            var adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FirstName = "Admin",
+                LastName = "User",
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(adminUser, "Admin123!");
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
     }
 }
