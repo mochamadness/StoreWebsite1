@@ -1,4 +1,4 @@
-﻿namespace PharmaCosmetics.Web.Models.ViewModels;
+namespace PharmaCosmetics.Web.Models.ViewModels;
 
 public class ProductListFilter
 {
@@ -12,6 +12,7 @@ public class ProductListFilter
 
 public class ProductListItemVm
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
@@ -31,6 +32,7 @@ public class PagedResult<T>
 
 public class ProductDetailsVm
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
@@ -40,6 +42,25 @@ public class ProductDetailsVm
     public List<string> Tags { get; set; } = new();
     public List<ProductImageVm> Images { get; set; } = new();
     public List<ActiveIngredientVm> ActiveIngredients { get; set; } = new();
+}
+
+public class ProductCreateVm
+{
+    public string Name { get; set; } = string.Empty;
+    public string? ShortDescription { get; set; }
+    public string? FullDescription { get; set; }
+    public int CategoryId { get; set; }
+    public int? BrandId { get; set; }
+}
+
+public class ProductEditVm
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? ShortDescription { get; set; }
+    public string? FullDescription { get; set; }
+    public int CategoryId { get; set; }
+    public int? BrandId { get; set; }
 }
 
 public class ProductImageVm

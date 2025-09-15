@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PharmaCosmetics.Web.Data;
 using PharmaCosmetics.Web.Models.ViewModels;
+using PharmaCosmetics.Web.Models.Entities;
 
 namespace PharmaCosmetics.Web.Services;
 
@@ -73,5 +74,62 @@ public class ProductService : IProductService
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
         return entity == null ? null : _mapper.Map<ProductDetailsVm>(entity);
+    }
+
+    public async Task<ProductEditVm?> GetForEditAsync(int id)
+    {
+        var entity = await _db.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        return entity == null ? null : _mapper.Map<ProductEditVm>(entity);
+    }
+
+    public async Task<int> CreateAsync(ProductCreateVm model)
+    {
+        var entity = _mapper.Map<Product>(model);
+        entity.Slug = SlugHelper.Generate(model.Name);
+
+        _db.Products.Add(entity);
+        await _db.SaveChangesAsync();
+        return entity.Id;
+    }
+
+    public async Task<bool> UpdateAsync(ProductEditVm model)
+    {
+        var entity = await _db.Products.FindAsync(model.Id);
+        if (entity == null) return false;
+
+        _mapper.Map(model, entity);
+        entity.Slug = SlugHelper.Generate(model.Name);
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> SoftDeleteAsync(int id)
+    {
+        var entity = await _db.Products.FindAsync(id);
+        if (entity == null) return false;
+
+        entity.IsDeleted = true;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<IEnumerable<Category>> GetCategoriesAsync()
+    {
+        return await _db.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Brand>> GetBrandsAsync()
+    {
+        return await _db.Brands
+            .AsNoTracking()
+            .OrderBy(b => b.Name)
+            .ToListAsync();
     }
 }

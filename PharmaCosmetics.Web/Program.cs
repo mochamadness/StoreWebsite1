@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PharmaCosmetics.Web.Data;
 using PharmaCosmetics.Web.Services;
 using PharmaCosmetics.Web.Mappings;
+using PharmaCosmetics.Web.Models.Entities;
 using AutoMapper; // ensures Profile is in scope for AddProfile<T>()
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+// Add Identity services
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // AutoMapper registration
 builder.Services.AddAutoMapper(cfg =>
@@ -42,6 +56,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "product-details",
     pattern: "product/{slug}",
@@ -50,5 +67,7 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Products}/{action=Index}/{id?}");
+
+app.MapRazorPages();
 
 app.Run();
